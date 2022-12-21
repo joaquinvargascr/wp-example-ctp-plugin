@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+
+  wordpress:
+    image: wordpress:6.1.1-apache
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - ./example-ctp-plugin:/var/www/html/wp-content/plugins/example-ctp-plugin
+      - wordpress:/var/www/html
+    depends_on:
+      - db
+
+  pma:
+    image: bitnami/phpmyadmin:latest
+    ports:
+      - '8088:8080'
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USER: wordpress
+      DATABASE_PASSWORD: wordpress
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - db:/var/lib/mysql
+      - ./wordpress.sql.gz:/docker-entrypoint-initdb.d/wordpress.sql.gz
+
+
+volumes:
+  wordpress:
+  db:
